@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// =========================
+//        MODELS
+// =========================
+
+model User {
+  id          Int       @id @default(autoincrement())
+  name        String
+  email       String     @unique
+  password    String
+  phone       String?
+  role        Role       @default(CUSTOMER)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  vehicles      Vehicle[]
+  bookings      Booking[]
+  activityLogs  ActivityLog[]
+  sessions      Session[]
+}
+
+model Vehicle {
+  id          Int        @id @default(autoincrement())
+  userId      Int
+  plateNumber String
+  brand       String
+  model       String
+  year        Int?
+  createdAt   DateTime    @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings    Booking[]
+}
+
+model ServicePackage {
+  id          Int        @id @default(autoincrement())
+  name        String
+  description String?
+  price       Decimal     @db.Decimal(10,2)
+  durationMin Int
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  bookings    Booking[]
+}
+
+model MealOption {
+  id          Int        @id @default(autoincrement())
+  name        String
+  price       Decimal     @db.Decimal(10,2)
+  description String?
+  createdAt   DateTime    @default(now())
+
+  bookings    Booking[]
+}
+
+model Booking {
+  id               Int          @id @default(autoincrement())
+  userId           Int
+  vehicleId        Int
+  packageId        Int
+  mealOptionId     Int?         // Optional
+  bookingDate      DateTime
+  status           BookingStatus @default(PENDING)
+  progressStatus   ProgressStatus @default(RECEIVED)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  // Relations
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicle          Vehicle       @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  servicePackage   ServicePackage @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  // If a meal option is deleted, set booking.mealOptionId to null (don't delete booking)
+  mealOption       MealOption?   @relation(fields: [mealOptionId], references: [id], onDelete: SetNull)
+  updates          ServiceUpdate[]
+}
+
+model ServiceUpdate {
+  id          Int       @id @default(autoincrement())
+  bookingId   Int
+  status      ProgressStatus
+  note        String?
+  updatedAt   DateTime @default(now())
+
+  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id           Int       @id @default(autoincrement())
+  refreshToken String    @unique
+  userId       Int
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime?  @updatedAt
+  expiresAt    DateTime
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  action    String   // e.g., CREATE_BOOKING, UPDATE_STATUS
+  detail    String?
+  createdAt DateTime @default(now())
+
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// =========================
+//         ENUMS
+// =========================
+
+enum Role {
+  CUSTOMER
+  STAFF
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum ProgressStatus {
+  RECEIVED
+  PROCESSING
+  WASHING
+  POLISHING
+  READY_FOR_PICKUP
+  COMPLETED
+}
