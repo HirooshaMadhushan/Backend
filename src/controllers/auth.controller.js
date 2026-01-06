@@ -1,6 +1,13 @@
 import { prisma } from "../config/db.js";
+import { OAuth2Client } from "google-auth-library";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+
+
+
+
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const register = async (req, res) => {
   try {
@@ -232,3 +239,56 @@ export const updateProfile=async (req,res)=>{
     
   }
 }
+export const googleLogin = async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) return res.status(400).json({ message: "Token is missing" });
+
+    // 1️⃣ Verify Google token
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    if (!payload || !payload.email)
+      return res.status(400).json({ message: "Invalid Google token" });
+
+    // 2️⃣ Check if user exists
+    let user = await prisma.user.findUnique({ where: { email: payload.email } });
+
+    // 3️⃣ Create user if new
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          name: payload.name,
+          email: payload.email,
+          password: "", // empty for Google login
+          role: "CUSTOMER",
+        },
+      });
+    }
+
+    // 4️⃣ Generate JWT using the same secret as normal login
+    const accessToken = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_ACCESS_SECRET, // use the correct secret
+      { expiresIn: "7d" }
+    );
+
+    // 5️⃣ Set cookie
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    // 6️⃣ Respond
+    res.status(200).json({ success: true, user, accessToken });
+  } catch (err) {
+    console.error("Google login error:", err);
+    res.status(401).json({ message: "Google authentication failed" });
+  }
+};
