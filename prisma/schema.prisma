@@ -62,7 +62,7 @@ model MealOption {
 
   bookings    Booking[]
 }
-
+9
 model Booking {
   id               Int          @id @default(autoincrement())
   userId           Int
