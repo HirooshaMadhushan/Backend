@@ -4,6 +4,7 @@ import { registerValidator } from "../validators/auth.validator.js";
 import { loginValidator } from "../validators/auth.validator.js";
 import { validate } from "../middleware/validate.js";
 import {protect} from '../middleware/auth.js';
+
 const router = express.Router();
 
 router.post("/register",registerValidator,validate,  register);
@@ -13,6 +14,7 @@ router.post("/logout", logout);
 router.get("/profile",protect,getProfile);
 router.put("/profile",protect,updateProfile);
 router.post("/google-login", googleLogin);
+
 
 
 

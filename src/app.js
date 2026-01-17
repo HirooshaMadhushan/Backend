@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
 import authRoutes from "./routes/auth.routes.js";
 import packageRoutes from "./routes/package.routes.js";
-
+import contactRoutes from "./routes/contact.routes.js";
 import bookingRoutes from "./routes/booking.routes.js";
 
 dotenv.config();
@@ -21,7 +21,7 @@ app.use(cookieParser());
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/packages', packageRoutes);
-
+app.use('/api/contact', contactRoutes);
 app.use('/api/bookings', bookingRoutes);
 
 
