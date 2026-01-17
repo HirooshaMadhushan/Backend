@@ -206,39 +206,91 @@ export const getProfile = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.userId },
-      select: { id: true, name: true, email: true, phone: true, role: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        createdAt: true,
+      },
     });
-    res.status(200).json({ user });
+
+    res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
 };
 
-export const updateProfile=async (req,res)=>{
+
+export const updateProfile = async (req, res) => {
   try {
-    const{name,phone,password,email}=req.body;
-    const userId=req.user.userId;
+    const { name, phone, email } = req.body;
+    const userId = req.user.userId;
 
-    const updateData={};
-    if(name) updateData.name=name;
-    if(phone) updateData.phone=phone;
-    if(email) updateData.email=email;
-    if(password){
-      const hashedPassword=await bcrypt.hash(password,10);
-      updateData.password=hashedPassword;
+    // Check email uniqueness
+    if (email) {
+      const existingUser = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (existingUser && existingUser.id !== userId) {
+        return res.status(400).json({ message: "Email already in use" });
+      }
     }
-    await prisma.user.update({
-      where:{id:userId},
-      data:updateData
-    });
-    res.status(200).json({message:"Profile updated successfully"});
 
-    
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        name,
+        phone,
+        email,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+      },
+    });
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
   } catch (error) {
-    res.status(500).json({message:"Server error"});
-    
+    res.status(500).json({ message: "Server error" });
   }
-}
+};
+
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.userId;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 export const googleLogin = async (req, res) => {
   try {
     const { token } = req.body;
