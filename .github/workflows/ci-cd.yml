@@ -37,7 +37,7 @@ jobs:
       - name: Generate Prisma Client
         env:
           DATABASE_URL: mysql://root:wmhmw@127.0.0.1:3306/autobook
-        run: npx prisma migrsate deploy
+        run: npx prisma migrate deploy
 
       - name: Reset Database & Apply Migrations
         env:
