@@ -78,3 +78,26 @@ GOOGLE_CLIENT_ID="your_google_client_id"
 
 EMAIL_USER="your_email@gmail.com"
 EMAIL_PASS="your_app_password"
+
+# Generate Prisma client
+npx prisma generate
+
+# Run migrations
+npx prisma migrate dev
+
+# Push schema to database (development only)
+npx prisma db push
+
+📦 Key Dependencies
+express → API framework
+prisma → database ORM
+@prisma/client → database client
+bcrypt / bcryptjs → password hashing
+jsonwebtoken → authentication
+socket.io → real-time communication
+nodemailer → email service
+zod → validation
+express-validator → validation
+express-rate-limit → security
+cors → cross-origin requests
+dotenv → environment variables
