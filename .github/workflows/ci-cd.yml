@@ -34,15 +34,10 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Generate Prisma Client
+      - name: Run Prisma Migrations
         env:
           DATABASE_URL: mysql://root:wmhmw@127.0.0.1:3306/autobook
         run: npx prisma migrate deploy
-
-      - name: Reset Database & Apply Migrations
-        env:
-          DATABASE_URL: mysql://root:wmhmw@127.0.0.1:3306/autobook
-        run: npx prisma migrate reset --force
 
       - name: Build Docker Image
         run: docker build -t hiroosha/autobook-backend:latest .
@@ -54,4 +49,4 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/autobook-backend:latest
+        run: docker push hiroosha/autobook-backend:latest
