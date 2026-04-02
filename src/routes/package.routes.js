@@ -20,3 +20,11 @@ export default router;
 
 
 
+// {
+//  "name": "Premium Wash",
+//   "description": "pathumsfirst package",
+//   "price":250,
+//   "duration": 45
+  
+  
+// }
