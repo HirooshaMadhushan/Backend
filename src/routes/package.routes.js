@@ -17,3 +17,14 @@ router.post(
 router.get("/", getAllservicePackages);
 
 export default router;
+
+
+
+// {
+//  "name": "Pathum Tharanga",
+//   "email": "pathum@gmail.com",
+//   "password":"Wmhmw22595",
+//   "phone": "10703119616",
+//   "role": "ADMIN"
+  
+// }
