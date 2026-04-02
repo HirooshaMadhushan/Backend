@@ -8,20 +8,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:8
-        env:
-          MYSQL_ROOT_PASSWORD: wmhmw
-          MYSQL_DATABASE: autobook
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pwmhmw"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -36,7 +22,8 @@ jobs:
 
       - name: Run Prisma Migrations
         env:
-          DATABASE_URL: mysql://root:wmhmw@127.0.0.1:3306/autobook
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
         run: npx prisma migrate deploy
 
       - name: Build Docker Image
