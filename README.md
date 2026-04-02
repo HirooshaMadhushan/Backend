@@ -101,3 +101,10 @@ express-validator → validation
 express-rate-limit → security
 cors → cross-origin requests
 dotenv → environment variables
+
+✅ CI/CD pipeline using GitHub Actions
+✅ Swagger API documentation
+✅ Unit testing with Jest
+✅ Logging system (Winston / Pino)
+✅ Deployment on AWS / VPS
+✅ Frontend integration (Next.js / React)
