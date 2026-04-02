@@ -8,24 +8,19 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// =========================
-//        MODELS
-// =========================
-
 model User {
-  id          Int       @id @default(autoincrement())
-  name        String
-  email       String    @unique
-  password    String
-  phone       String?
-  role        Role      @default(CUSTOMER)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  vehicles      Vehicle[]
-  bookings      Booking[]
-  activityLogs  ActivityLog[]
-  sessions      Session[]
+  id           Int           @id @default(autoincrement())
+  name         String
+  email        String        @unique
+  password     String
+  phone        String?
+  role         Role          @default(CUSTOMER)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  activityLogs ActivityLog[]
+  bookings     Booking[]
+  sessions     Session[]
+  vehicles     Vehicle[]
 }
 
 model ContactMessage {
@@ -45,73 +40,67 @@ model Vehicle {
   model       String
   year        Int?
   createdAt   DateTime  @default(now())
-
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   bookings    Booking[]
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model ServicePackage {
   id          Int       @id @default(autoincrement())
   name        String
   description String?
-  price       Decimal   @db.Decimal(10,2)
+  price       Decimal   @db.Decimal(10, 2)
   durationMin Int
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-
   bookings    Booking[]
 }
 
 model MealOption {
   id          Int       @id @default(autoincrement())
   name        String
-  price       Decimal   @db.Decimal(10,2)
+  price       Decimal   @db.Decimal(10, 2)
   description String?
   createdAt   DateTime  @default(now())
-
   bookings    Booking[]
 }
 
 model Booking {
-  id             Int           @id @default(autoincrement())
+  id             Int             @id @default(autoincrement())
   userId         Int
   vehicleId      Int
   packageId      Int
-  mealOptionId   Int?          
+  mealOptionId   Int?
   bookingDate    DateTime
-  status         BookingStatus @default(PENDING)
-  progressStatus ProgressStatus @default(RECEIVED)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-
-  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  vehicle        Vehicle        @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
-  servicePackage ServicePackage @relation(fields: [packageId], references: [id], onDelete: Restrict)
-  mealOption     MealOption?    @relation(fields: [mealOptionId], references: [id], onDelete: SetNull)
+  status         BookingStatus   @default(PENDING)
+  progressStatus ProgressStatus  @default(RECEIVED)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  mealOption     MealOption?     @relation(fields: [mealOptionId], references: [id])
+  servicePackage ServicePackage  @relation(fields: [packageId], references: [id])
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicle        Vehicle         @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
   updates        ServiceUpdate[]
 }
 
 model ServiceUpdate {
-  id        Int       @id @default(autoincrement())
+  id        Int            @id @default(autoincrement())
   bookingId Int
   status    ProgressStatus
   note      String?
-  updatedAt DateTime  @default(now())
-
-  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  updatedAt DateTime       @default(now())
+  booking   Booking        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 }
 
 model Session {
-  id           Int       @id @default(autoincrement())
-  refreshToken String    @unique
+  id           Int      @id @default(autoincrement())
+  refreshToken String   @unique
   userId       Int
   ipAddress    String?
   userAgent    String?
-  createdAt    DateTime  @default(now())
+  createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   expiresAt    DateTime
-
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model ActivityLog {
@@ -122,10 +111,6 @@ model ActivityLog {
   userId    Int
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
-
-// =========================
-//         ENUMS
-// =========================
 
 enum Role {
   CUSTOMER
