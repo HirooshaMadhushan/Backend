@@ -21,10 +21,11 @@ jobs:
         run: npm install
 
       - name: Run Prisma Migrations
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DIRECT_URL: ${{ secrets.DIRECT_URL }}
         run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DIRECT_URL }}
+          
+        
 
       - name: Build Docker Image
         run: docker build -t hiroosha/autobook-backend:latest .
